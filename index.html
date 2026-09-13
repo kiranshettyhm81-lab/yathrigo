@@ -6,6 +6,7 @@
 <title>YathriGo</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
+.location-status{font-size:12px;color:#666;padding:4px 4px 8px;font-weight:600}.selected-address{font-size:13px;line-height:1.35;color:#222;margin-top:4px}
 *{box-sizing:border-box}
 body{margin:0;background:#eef2f0;font-family:Arial,sans-serif;color:#101820}
 .app{max-width:480px;margin:auto;min-height:100vh;background:#fff;overflow:hidden;padding-bottom:82px}
@@ -41,12 +42,12 @@ nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px
 <div class="app">
 <div id="map"></div>
 <button class="map-gps" onclick="usePickup()" aria-label="Use current location">⌾</button>
-<div id="addressPill" class="address-pill" onclick="usePickup()" title="Tap to use current pickup location"><b>●</b> Use current location for pickup</div>
+<div id="addressPill" class="address-pill" onclick="openPickupPicker()" title="Change pickup location"><b>●</b> Use current location for pickup</div>
 
 <div class="sheet">
 <div class="handle"></div>
 
-<div class="search">🔎 <input id="destination" placeholder="Where do you want to go?"></div>
+<div class="search">🔎 <input id="destination" placeholder="Where do you want to go? Search area, cross, landmark"></div>
 <div id="results" class="result-box"></div>
 
 <div id="dropCard" class="drop-card">
@@ -123,7 +124,19 @@ const input=document.getElementById('destination');
 input.addEventListener('input',()=>searchDest(input.value));
 input.addEventListener('keydown',e=>{if(e.key==='Enter')searchDest(input.value)});
 
-async function searchDest(q){
+async function compactAddress(a, fallback){
+  if(!a) return fallback || '';
+  const parts=[];
+  if(a.house_number) parts.push(a.house_number);
+  if(a.road) parts.push(a.road);
+  if(a.neighbourhood) parts.push(a.neighbourhood);
+  else if(a.suburb) parts.push(a.suburb);
+  if(a.city) parts.push(a.city);
+  else if(a.town) parts.push(a.town);
+  else if(a.village) parts.push(a.village);
+  return parts.filter(Boolean).join(', ') || fallback || '';
+}
+function searchDest(q){
  const box=document.getElementById('results');
  if(q.trim().length<3){box.style.display='none';return}
  box.style.display='block';box.innerHTML='<div class="result">Searching full address...</div>';
@@ -165,3 +178,51 @@ init();
 </script>
 </body>
 </html>
+<div id="pickupSearchBox" class="location-picker" style="display:none">
+  <div class="picker-head"><b>Choose pickup location</b><button onclick="closePickupPicker()">✕</button></div>
+  <input id="pickupSearchInput" placeholder="Search pickup: area, cross, landmark" />
+  <button onclick="usePickup()">📍 Use my current location</button>
+  <div id="pickupResults"></div>
+</div>
+<script>
+function openPickupPicker(){
+  const x=document.getElementById('pickupSearchBox'); if(x) x.style.display='block';
+  const i=document.getElementById('pickupSearchInput'); if(i) i.focus();
+}
+function closePickupPicker(){
+  const x=document.getElementById('pickupSearchBox'); if(x) x.style.display='none';
+}
+async function searchPickupPlace(q){
+  q=(q||'').trim(); if(!q) return;
+  const box=document.getElementById('pickupResults');
+  if(box) box.innerHTML='<div style="padding:10px;color:#777">Searching…</div>';
+  try{
+    const u='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q='+encodeURIComponent(q);
+    const r=await fetch(u,{headers:{'Accept':'application/json'}});
+    const data=await r.json();
+    if(!box) return;
+    box.innerHTML=data.map(x=>{
+      const safe=(x.display_name||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return '<button class="pick-result" onclick="selectPickupPlace('+x.lat+','+x.lon+',\''+safe.replace(/'/g,"\\'")+'\')">'+safe+'</button>';
+    }).join('') || '<div style="padding:10px;color:#777">No location found</div>';
+  }catch(e){ if(box) box.innerHTML='<div style="padding:10px;color:#c00">Search failed. Try again.</div>'; }
+}
+function selectPickupPlace(lat,lon,address){
+  if(typeof setPickup==='function') setPickup(Number(lat),Number(lon),address);
+  else {
+    window.pickupLat=Number(lat); window.pickupLon=Number(lon); window.pickupAddress=address;
+    const p=document.getElementById('addressPill'); if(p) p.innerHTML='<b>●</b> '+address;
+  }
+  closePickupPicker();
+}
+const psi=document.getElementById('pickupSearchInput');
+if(psi) psi.addEventListener('keydown',e=>{if(e.key==='Enter') searchPickupPlace(psi.value)});
+</script>
+<style>
+.location-picker{position:fixed;left:12px;right:12px;bottom:12px;z-index:2000;background:#fff;border-radius:18px;padding:14px;box-shadow:0 8px 30px #0004}
+.picker-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.picker-head button{border:0;background:#eee;border-radius:50%;width:32px;height:32px}
+.location-picker input{width:100%;box-sizing:border-box;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:15px}
+.location-picker>button{margin-top:9px;width:100%;padding:12px;border:0;border-radius:12px;background:#0a9a50;color:#fff;font-weight:700}
+.pick-result{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eee;background:#fff;padding:12px 4px;font-size:13px}
+</style>
