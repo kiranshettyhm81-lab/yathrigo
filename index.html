@@ -9,7 +9,7 @@
 body{margin:0;background:#f4f7f5;font-family:Arial,sans-serif;color:#102018}
 .app{max-width:480px;margin:auto;min-height:100vh;background:#fff;padding-bottom:82px}
 header{height:92px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee}
-.logo{font-size:29px;font-weight:800}.y{color:#087b3f}.g{color:#f5c400}
+.menu{font-size:30px}.logo{font-size:29px;font-weight:800}.y{color:#087b3f}.g{color:#f5c400}
 .tag{font-size:13px;color:#666;text-align:center;margin-top:2px}
 .hero{margin:16px;border-radius:22px;background:linear-gradient(120deg,#087b42,#0a9250);color:#fff;height:190px;padding:24px;position:relative;overflow:hidden}
 .hero h1{font-size:29px;line-height:1.05;margin:0;width:58%}
@@ -22,9 +22,11 @@ h2{margin:0 0 16px;font-size:27px}
 .pickup b{color:#087b42}.drop b{color:#c74755}
 .address{font-size:16px;margin-top:7px;line-height:1.3;word-break:break-word}
 .house{width:100%;margin-top:10px;padding:13px;border:1px solid #dfe6e2;border-radius:13px;font-size:16px}
-button{width:100%;border:0;border-radius:13px;padding:15px;background:#078b4e;color:white;font-size:17px;font-weight:800;margin-top:10px}
+button{width:100%;border:0;border-radius:13px;padding:15px;background:#078b4e;color:white;font-size:17px;font-weight:800;margin-top:10px;cursor:pointer}
+button.alt{background:#fff;color:#087b42;border:1px solid #087b42}
 .small{font-size:12px;color:#777;margin-top:7px}
-.quick{display:flex;margin-top:12px}.quick div{flex:1;text-align:center;padding:8px;border-right:1px solid #ddd;font-weight:700}
+.quick{display:flex;margin-top:12px}
+.quick div{flex:1;text-align:center;padding:8px;border-right:1px solid #ddd;font-weight:700}
 .quick div:last-child{border:0}.quick span{display:block;font-size:12px;font-weight:normal;color:#777;margin-top:3px}
 .features{display:flex;margin:14px;background:#eff9f4;border-radius:17px;padding:12px 3px}
 .features div{flex:1;text-align:center;font-size:11px}.features strong{display:block;color:#087b42;font-size:20px}
@@ -36,14 +38,13 @@ nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3p
 </head>
 <body>
 <div class="app">
-
 <header>
-<div>☰</div>
+<div class="menu">☰</div>
 <div>
 <div class="logo"><span class="y">Yathri</span><span class="g">Go</span> 🛺</div>
 <div class="tag">Your Ride, Our Promise</div>
 </div>
-<div>♧</div>
+<div style="font-size:27px">♧</div>
 </header>
 
 <div class="hero">
@@ -65,12 +66,11 @@ nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3p
 
 <div class="loc drop">
 <b>🔴 Drop location</b>
+<div id="dropAddressText" class="address">Enter drop location</div>
 <input id="dropAddress" class="house" placeholder="Enter drop location">
-
-<button onclick="getDropLocation()">📍 Use Current Location for Drop</button>
-
 <input id="dropHouse" class="house" placeholder="🏠 Drop House / Door No.">
-<div class="small">Drop GPS address ಸಿಕ್ಕಿದ ನಂತರ Drop House / Door No. ಸೇರಿಸಿ.</div>
+<button class="alt" onclick="getDropLocation()">📍 Use Current Location for Drop</button>
+<div class="small">Drop GPS location ಪಡೆಯಲು ಈ button ಒತ್ತಿ.</div>
 </div>
 
 <div class="quick">
@@ -103,79 +103,83 @@ nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3p
 let coords=null;
 let dropCoords=null;
 
-function getLocation(){
-const out=document.getElementById("pickupAddress");
-out.textContent="Location ಹುಡುಕುತ್ತಿದೆ...";
+async function reverseAddress(lat,lon,out){
+out.textContent='GPS location ಸಿಕ್ಕಿದೆ. Full address ಹುಡುಕುತ್ತಿದೆ...';
+try{
+const r=await fetch(
+'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+
+lat+'&lon='+lon+'&zoom=18&addressdetails=1'
+);
+const d=await r.json();
+out.textContent=d.display_name || ('Current Location ('+
+lat.toFixed(6)+', '+lon.toFixed(6)+')');
+}catch(e){
+out.textContent='Current Location ('+
+lat.toFixed(6)+', '+lon.toFixed(6)+')';
+}
+}
 
+function getLocation(){
+const out=document.getElementById('pickupAddress');
+out.textContent='Location ಹುಡುಕುತ್ತಿದೆ...';
 if(!navigator.geolocation){
-out.textContent="ಈ browser GPS support ಮಾಡಲ್ಲ.";
+out.textContent='ಈ browser GPS support ಮಾಡಲ್ಲ.';
 return;
 }
-
 navigator.geolocation.getCurrentPosition(async p=>{
 coords={lat:p.coords.latitude,lon:p.coords.longitude};
-out.textContent="GPS location ಸಿಕ್ಕಿದೆ. Full address ಹುಡುಕುತ್ತಿದೆ...";
-
-try{
-const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+coords.lat+"&lon="+coords.lon+"&zoom=18&addressdetails=1");
-const d=await r.json();
-out.textContent=d.display_name||"Current Location";
-}catch(e){
-out.textContent="Current Location";
-}
+await reverseAddress(coords.lat,coords.lon,out);
 },()=>{
-out.textContent="Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.";
+out.textContent='Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.';
 },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
 function getDropLocation(){
-const out=document.getElementById("dropAddress");
-out.value="Drop location ಹುಡುಕುತ್ತಿದೆ...";
+const out=document.getElementById('dropAddressText');
+const input=document.getElementById('dropAddress');
+out.textContent='Drop location ಹುಡುಕುತ್ತಿದೆ...';
 
 if(!navigator.geolocation){
-out.value="ಈ browser GPS support ಮಾಡಲ್ಲ.";
+out.textContent='ಈ browser GPS support ಮಾಡಲ್ಲ.';
 return;
 }
 
 navigator.geolocation.getCurrentPosition(async p=>{
 dropCoords={lat:p.coords.latitude,lon:p.coords.longitude};
-
-try{
-const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+dropCoords.lat+"&lon="+dropCoords.lon+"&zoom=18&addressdetails=1");
-const d=await r.json();
-out.value=d.display_name||"Current Location";
-}catch(e){
-out.value="Current Location";
-}
+await reverseAddress(dropCoords.lat,dropCoords.lon,out);
+input.value=out.textContent;
 },()=>{
-out.value="Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.";
+out.textContent='Drop location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.';
 },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
 function bookAuto(){
-const house=document.getElementById("pickupHouse").value.trim();
-const drop=document.getElementById("dropAddress").value.trim();
+const house=document.getElementById('pickupHouse').value.trim();
+const drop=document.getElementById('dropAddress').value.trim();
+const dropHouse=document.getElementById('dropHouse').value.trim();
 
 if(!coords){
-alert("ಮೊದಲು Pickup ಗೆ Use Current Location ಒತ್ತಿ.");
+alert('ಮೊದಲು Pickup ನಲ್ಲಿ Use Current Location ಒತ್ತಿ.');
 return;
 }
 if(!house){
-alert("Pickup House / Door No. ನಮೂದಿಸಿ.");
+alert('Pickup House / Door No. ನಮೂದಿಸಿ.');
 return;
 }
-if(!drop){
-alert("Drop location ನಮೂದಿಸಿ.");
+if(!drop && !dropCoords){
+alert('Drop location ನಮೂದಿಸಿ ಅಥವಾ Drop GPS button ಒತ್ತಿ.');
+return;
+}
+if(!dropHouse){
+alert('Drop House / Door No. ನಮೂದಿಸಿ.');
 return;
 }
 
-document.getElementById("message").innerHTML="🛺 Auto ಹುಡುಕಲಾಗುತ್ತಿದೆ...";
-
+document.getElementById('message').innerHTML='🛺 Auto ಹುಡುಕಲಾಗುತ್ತಿದೆ...';
 setTimeout(()=>{
-document.getElementById("message").innerHTML="✅ Driver request sent. Demo booking successful.";
+document.getElementById('message').innerHTML='✅ Driver request sent. Demo booking successful.';
 },900);
 }
 </script>
-
 </body>
 </html>
