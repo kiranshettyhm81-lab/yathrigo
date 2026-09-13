@@ -124,7 +124,7 @@ const input=document.getElementById('destination');
 input.addEventListener('input',()=>searchDest(input.value));
 input.addEventListener('keydown',e=>{if(e.key==='Enter')searchDest(input.value)});
 
-async function compactAddress(a, fallback){
+function compactAddress(a, fallback){
   if(!a) return fallback || '';
   const parts=[];
   if(a.house_number) parts.push(a.house_number);
@@ -136,7 +136,7 @@ async function compactAddress(a, fallback){
   else if(a.village) parts.push(a.village);
   return parts.filter(Boolean).join(', ') || fallback || '';
 }
-function searchDest(q){
+async function searchDest(q){
  const box=document.getElementById('results');
  if(q.trim().length<3){box.style.display='none';return}
  box.style.display='block';box.innerHTML='<div class="result">Searching full address...</div>';
