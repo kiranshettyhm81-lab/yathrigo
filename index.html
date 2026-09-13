@@ -36,7 +36,8 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,
 nav div{flex:1;text-align:center;padding-top:9px;color:#68736f;font-size:13px;font-weight:700}
 nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px}
 #toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#10251b;color:#fff;padding:10px 15px;border-radius:12px;z-index:2000;display:none}
-.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}</style>
+.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}.search{position:relative}.search-btn{width:auto;margin:0;padding:9px 13px;border-radius:20px;background:#0a9a50;color:#fff;font-size:13px;flex:0 0 auto}
+.search input{min-width:0}.result small{word-break:break-word}</style>
 </head>
 <body>
 <div class="app">
@@ -47,7 +48,8 @@ nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px
 <div class="sheet">
 <div class="handle"></div>
 
-<div class="search">🔎 <input id="destination" placeholder="Where do you want to go? Search area, cross, landmark"></div>
+<div class="search">🔎 <input id="destination" placeholder="Where do you want to go? Search area, cross, landmark">
+<button class="search-btn" onclick="searchDest(document.getElementById('destination').value)">Search</button></div>
 <div id="results" class="result-box"></div>
 <button class="map-drop-btn" onclick="pickDropOnMap()">📍 Choose exact Drop on Map</button>
 
@@ -122,7 +124,7 @@ function usePickup(){
  },()=>toast('Location permission Allow ಮಾಡಿ, ನಂತರ try ಮಾಡಿ'),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 const input=document.getElementById('destination');
-input.addEventListener('input',()=>searchDest(input.value));
+input.addEventListener('input',()=>{document.getElementById('results').style.display='none';});
 input.addEventListener('keydown',e=>{if(e.key==='Enter')searchDest(input.value)});
 
 function compactAddress(a, fallback){
@@ -140,11 +142,15 @@ function compactAddress(a, fallback){
 async function searchDest(q){
   const box=document.getElementById('results');
   q=(q||'').trim();
-  if(q.length<2){box.style.display='none';return;}
-  box.style.display='block';
-  box.innerHTML='<div class="result">🔎 Searching location...</div>';
+  if(q.length<2){
+    box.style.display='block';
+    box.innerHTML='<div class="result">Type an area, cross, landmark or house number.</div>';
+    return;
+  }
 
-  // Helpful corrections for common Bengaluru spellings.
+  box.style.display='block';
+  box.innerHTML='<div class="result">🔎 Searching exact location...</div>';
+
   const corrections={
     'yashwanpura':'Yeshwanthpur',
     'yashwantpura':'Yeshwanthpur',
@@ -154,55 +160,43 @@ async function searchDest(q){
   };
   const corrected=corrections[q.toLowerCase()]||q;
 
-  const queries=[
-    corrected,
-    corrected+', Bengaluru, Karnataka',
-    q+', Bengaluru, Karnataka'
-  ];
+  async function photon(query){
+    const url='https://photon.komoot.io/api/?limit=8&lang=en&q='+encodeURIComponent(query);
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('Photon unavailable');
+    const d=await r.json();
+    return (d.features||[]).map(f=>{
+      const p=f.properties||{};
+      return {
+        lat:f.geometry.coordinates[1],
+        lon:f.geometry.coordinates[0],
+        display_name:[p.name,p.street,p.suburb,p.district,p.city||p.town,p.state].filter(Boolean).join(', ')
+      };
+    });
+  }
 
   async function nominatim(query){
     const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=in&q='+encodeURIComponent(query);
     const r=await fetch(url,{headers:{'Accept':'application/json'}});
-    if(!r.ok) throw new Error('Nominatim '+r.status);
+    if(!r.ok) throw new Error('Nominatim unavailable');
     return await r.json();
   }
 
-  async function photon(query){
-    const url='https://photon.komoot.io/api/?limit=8&lang=en&q='+encodeURIComponent(query);
-    const r=await fetch(url);
-    if(!r.ok) throw new Error('Photon '+r.status);
-    const d=await r.json();
-    return (d.features||[]).map(f=>({
-      lat:f.geometry.coordinates[1],
-      lon:f.geometry.coordinates[0],
-      display_name:[
-        f.properties.name,
-        f.properties.street,
-        f.properties.suburb,
-        f.properties.city||f.properties.town,
-        f.properties.state
-      ].filter(Boolean).join(', '),
-      address:f.properties
-    }));
-  }
-
   let data=[];
-  try{
-    for(const query of queries){
-      data=await nominatim(query);
-      if(data.length) break;
-    }
-  }catch(e){}
-
+  try{ data=await photon(corrected+', Hassan, Karnataka, India'); }catch(e){}
   if(!data.length){
-    try{
-      data=await photon(corrected+', Bengaluru');
-    }catch(e){}
+    try{ data=await photon(corrected+', Bengaluru, Karnataka, India'); }catch(e){}
+  }
+  if(!data.length){
+    try{ data=await nominatim(corrected+', Hassan, Karnataka, India'); }catch(e){}
+  }
+  if(!data.length){
+    try{ data=await nominatim(corrected+', Bengaluru, Karnataka, India'); }catch(e){}
   }
 
   box.innerHTML='';
   if(!data.length){
-    box.innerHTML='<div class="result">❌ Location ಸಿಗಲಿಲ್ಲ. Example: Yeshwanthpur Bengaluru / 5th Cross Satyamangala Hassan</div>';
+    box.innerHTML='<div class="result">❌ Address ಸಿಗಲಿಲ್ಲ. Example: Hanumantapura Hassan / 5th Cross Satyamangala Hassan</div><div class="result">📍 Exact location ಬೇಕಿದ್ದರೆ ಕೆಳಗಿನ “Choose exact Drop on Map” ಬಳಸಿ.</div>';
     return;
   }
 
@@ -210,7 +204,8 @@ async function searchDest(q){
     const el=document.createElement('div');
     el.className='result';
     const full=x.display_name||'Selected location';
-    el.innerHTML='<b>📍 '+(full.split(',')[0]||'Location')+'</b><small style="display:block;color:#777;margin-top:3px">'+full+'</small>';
+    const title=full.split(',')[0]||'Location';
+    el.innerHTML='<b>📍 '+title+'</b><small style="display:block;color:#777;margin-top:3px">'+full+'</small>';
     el.onclick=()=>selectDrop(Number(x.lat),Number(x.lon),full);
     box.appendChild(el);
   });
