@@ -3,155 +3,164 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>YathriGo - Ride</title>
+<title>YathriGo</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#eef2f0;font-family:Arial,sans-serif;color:#101820}
-.app{max-width:480px;margin:auto;min-height:100vh;background:#fff;position:relative;overflow:hidden;padding-bottom:78px}
-#map{height:48vh;min-height:430px;background:#e9eeee}
+.app{max-width:480px;margin:auto;min-height:100vh;background:#fff;overflow:hidden;padding-bottom:82px}
+#map{height:52vh;min-height:450px}
 .leaflet-control-attribution{font-size:8px}
-.pin{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:500;text-align:center}
-.pin-label{background:#0a9a50;color:#fff;padding:10px 30px;border-radius:28px;font-size:22px;font-weight:800;box-shadow:0 4px 12px #0002}
-.pin-dot{width:42px;height:42px;border-radius:50%;background:#0a9a50;border:7px solid #fff;box-shadow:0 2px 10px #0004;margin:-2px auto 0}
-.address-pill{position:absolute;left:18px;right:18px;bottom:12px;background:#fff;border-radius:28px;padding:15px 18px;box-shadow:0 5px 20px #0002;z-index:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.address-pill b{font-size:18px;margin-right:7px}
-.sheet{background:#fff;border-radius:28px 28px 0 0;margin-top:-2px;position:relative;z-index:700;padding:22px 20px 18px;box-shadow:0 -3px 16px #0001}
-.handle{width:55px;height:5px;background:#dce2df;border-radius:10px;margin:0 auto 18px}
-.search{display:flex;align-items:center;gap:10px;border:2px solid #e2e9e6;border-radius:32px;padding:15px 18px;font-size:20px;font-weight:800;box-shadow:0 2px 10px #00000008}
-.search input{border:0;outline:0;font-size:18px;width:100%;font-weight:600}
-button{border:0;cursor:pointer}
-.recent{margin-top:14px}
-.place{display:flex;gap:13px;align-items:center;padding:15px 0;border-bottom:1px dashed #d9dfdc}
-.clock{font-size:25px;color:#5d6a66}
-.place-main{flex:1}
-.place-name{font-size:18px;font-weight:800}
-.place-address{font-size:14px;color:#68746f;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.heart{font-size:27px;color:#62716c}
-.result-box{display:none;margin-top:8px;border:1px solid #e0e7e3;border-radius:15px;overflow:hidden;background:#fff}
-.result{padding:13px;border-bottom:1px solid #eee;font-size:14px}
-.result:last-child{border-bottom:0}
-.current{margin-top:14px;width:100%;padding:14px;border-radius:14px;background:#0a9a50;color:#fff;font-size:16px;font-weight:800}
-h3{margin:18px 0 5px;font-size:16px;color:#5d6965}
-.note{font-size:13px;color:#69736f}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:78px;background:#fff;border-top:1px solid #e2e5e3;display:flex;z-index:1000}
-nav div{flex:1;text-align:center;padding-top:10px;color:#68736f;font-size:13px;font-weight:700}
-nav .active{color:#101820}
-nav span{display:block;font-size:25px;line-height:27px;margin-bottom:3px}
-#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#10251b;color:#fff;padding:11px 16px;border-radius:12px;display:none;z-index:2000;font-size:14px}
+.pick-label{background:#0a9a50;color:white;border:0;border-radius:28px;padding:9px 28px;font-size:21px;font-weight:800;box-shadow:0 3px 10px #0003}
+.map-gps{position:absolute;right:18px;top:18px;z-index:650;width:48px;height:48px;border:0;border-radius:50%;background:#fff;color:#0a9a50;box-shadow:0 4px 14px #0003;font-size:27px;font-weight:900;cursor:pointer}.address-pill{position:absolute;left:18px;right:18px;top:calc(52vh - 65px);z-index:600;background:white;border-radius:28px;padding:14px 18px;box-shadow:0 5px 18px #0002;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.address-pill b{color:#0a9a50;margin-right:7px}
+.sheet{background:#fff;border-radius:28px 28px 0 0;margin-top:-2px;position:relative;z-index:700;padding:18px 20px 16px;box-shadow:0 -3px 16px #0001}
+.handle{width:55px;height:5px;background:#dce2df;border-radius:10px;margin:0 auto 16px}
+.search{display:flex;align-items:center;gap:10px;border:2px solid #e1e9e5;border-radius:32px;padding:14px 17px;box-shadow:0 2px 12px #00000008}
+.search input{border:0;outline:0;font-size:18px;font-weight:700;width:100%}
+.result-box{display:none;margin-top:7px;border:1px solid #dfe7e3;border-radius:15px;background:#fff;overflow:hidden}
+.result{padding:13px;border-bottom:1px solid #eee;font-size:14px;line-height:1.25}
+.result:last-child{border:0}
+.drop-card{display:none;margin-top:12px;padding:13px;border-radius:15px;background:#f2faf6;border:1px solid #d8eee1}
+.drop-title{font-weight:800;color:#c64e5b}
+.drop-address{margin-top:5px;font-size:14px;line-height:1.3}
+button{width:100%;border:0;border-radius:14px;padding:14px;background:#0a9a50;color:#fff;font-size:16px;font-weight:800;margin-top:12px}
+.current{background:#0a9a50}
+.recents{margin-top:12px}
+.place{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px dashed #d9dfdc}
+.clock{font-size:25px;color:#66736e}.main{flex:1;min-width:0}
+.name{font-size:17px;font-weight:800}.addr{font-size:13px;color:#69746f;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heart{font-size:26px;color:#62716c}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:80px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:1000}
+nav div{flex:1;text-align:center;padding-top:9px;color:#68736f;font-size:13px;font-weight:700}
+nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px}
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#10251b;color:#fff;padding:10px 15px;border-radius:12px;z-index:2000;display:none}
 </style>
 </head>
 <body>
 <div class="app">
-  <div id="map"></div>
-  <div class="pin">
-    <div class="pin-label">Pickup Point</div>
-    <div class="pin-dot"></div>
-  </div>
-  <div id="addressPill" class="address-pill"><b>●</b> Tap “Use My Location” to set pickup</div>
+<div id="map"></div>
+<button class="map-gps" onclick="usePickup()" aria-label="Use current location">⌾</button>
+<div id="addressPill" class="address-pill" onclick="usePickup()" title="Tap to use current pickup location"><b>●</b> Use current location for pickup</div>
 
-  <section class="sheet">
-    <div class="handle"></div>
-    <div class="search">
-      🔎
-      <input id="destination" placeholder="Where do you want to go?">
-    </div>
-    <div id="results" class="result-box"></div>
+<div class="sheet">
+<div class="handle"></div>
 
-    <button class="current" onclick="useLocation()">📍 Use My Current Location</button>
+<div class="search">🔎 <input id="destination" placeholder="Where do you want to go?"></div>
+<div id="results" class="result-box"></div>
 
-    <div class="recent">
-      <h3>Recent places</h3>
-      <div class="place" onclick="selectPlace('Taj Hotel','Race Course Road, Bengaluru')">
-        <div class="clock">◴</div><div class="place-main"><div class="place-name">Taj Hotel</div><div class="place-address">Race Course Road, Bharati Nagar, Bengaluru</div></div><div class="heart">♡</div>
-      </div>
-      <div class="place" onclick="selectPlace('24','2nd Main Rd, KEB Colony, Bengaluru')">
-        <div class="clock">◴</div><div class="place-main"><div class="place-name">24</div><div class="place-address">2nd Main Rd, KEB Colony, Bengaluru</div></div><div class="heart">♡</div>
-      </div>
-      <div class="place" onclick="selectPlace('Majestic Railway Reservation Office','Kempgegouda, Majestic, Bengaluru')">
-        <div class="clock">◴</div><div class="place-main"><div class="place-name">Majestic Railway Reservation Office</div><div class="place-address">Kempgegouda, Majestic, Bengaluru</div></div><div class="heart">♡</div>
-      </div>
-    </div>
-    <div class="note">Everything in minutes • Safe, verified auto rides</div>
-  </section>
+<div id="dropCard" class="drop-card">
+<div class="drop-title">🔴 Drop location</div>
+<div id="dropAddress" class="drop-address">Select a destination</div>
+</div>
 
-  <nav>
-    <div class="active"><span>➤</span>Ride</div>
-    <div><span>◎</span>Only</div>
-    <div><span>▣</span>Parcel</div>
-    <div><span>🧳</span>Travel</div>
-    <div><span>♙</span>Profile</div>
-  </nav>
+
+<div class="recents">
+<div class="place" onclick="quickDrop('Taj Hotel','Race Course Road, Bharati Nagar, Bengaluru')">
+<div class="clock">◴</div><div class="main"><div class="name">Taj Hotel</div><div class="addr">Race Course Road, Bharati Nagar, Bengaluru</div></div><div class="heart">♡</div>
+</div>
+<div class="place" onclick="quickDrop('24','2nd Main Road, KEB Colony, Bengaluru')">
+<div class="clock">◴</div><div class="main"><div class="name">24</div><div class="addr">2nd Main Road, KEB Colony, Bengaluru</div></div><div class="heart">♡</div>
+</div>
+<div class="place" onclick="quickDrop('Majestic Railway Reservation Office','Kempgegouda, Majestic, Bengaluru')">
+<div class="clock">◴</div><div class="main"><div class="name">Majestic Railway Reservation Office</div><div class="addr">Kempgegouda, Majestic, Bengaluru</div></div><div class="heart">♡</div>
+</div>
+</div>
+</div>
+
+<nav>
+<div class="active"><span>➤</span>Ride</div>
+<div><span>◎</span>Only</div>
+<div><span>▣</span>Parcel</div>
+<div><span>🧳</span>Travel</div>
+<div><span>♙</span>Profile</div>
+</nav>
 </div>
 <div id="toast"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let map, marker, pickupCoords=null;
+let map,pickMarker,dropMarker,routeLine,pickup=null,drop=null;
+const mapCenter=[12.9716,77.5946];
+
 function init(){
-  map=L.map('map',{zoomControl:false}).setView([12.9716,77.5946],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-  L.control.zoom({position:'topright'}).addTo(map);
-  map.on('click',e=>{
-    setPickup(e.latlng.lat,e.latlng.lng,'Map selected pickup');
-  });
+ map=L.map('map',{zoomControl:false}).setView(mapCenter,14);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+ L.control.zoom({position:'topright'}).addTo(map);
 }
-function setPickup(lat,lon,label){
-  pickupCoords={lat,lon};
-  if(marker) marker.remove();
-  marker=L.marker([lat,lon]).addTo(map);
-  map.setView([lat,lon],16);
-  reverse(lat,lon,label);
+function pickupIcon(){
+ return L.divIcon({className:'',html:'<div style="width:42px;height:42px;border-radius:50%;background:#0a9a50;border:7px solid white;box-shadow:0 2px 10px #0005"></div>',iconSize:[42,42],iconAnchor:[21,21]});
 }
-async function reverse(lat,lon,fallback){
-  document.getElementById('addressPill').textContent='● Finding full pickup address...';
-  try{
-    const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+lat+'&lon='+lon+'&zoom=18&addressdetails=1');
-    const d=await r.json();
-    document.getElementById('addressPill').innerHTML='<b>●</b> '+(d.display_name||fallback);
-  }catch(e){
-    document.getElementById('addressPill').innerHTML='<b>●</b> '+fallback;
-  }
+function dropIcon(){
+ return L.divIcon({className:'',html:'<div style="width:42px;height:42px;border-radius:50%;background:#d65360;border:7px solid white;box-shadow:0 2px 10px #0005"></div>',iconSize:[42,42],iconAnchor:[21,21]});
 }
-function useLocation(){
-  if(!navigator.geolocation){show('GPS not supported');return}
-  show('Getting your pickup location...');
-  navigator.geolocation.getCurrentPosition(p=>{
-    setPickup(p.coords.latitude,p.coords.longitude,'Current pickup');
-  },()=>show('Location permission Allow ಮಾಡಿ, ನಂತರ try ಮಾಡಿ'),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+function setPickup(lat,lon,address){
+ pickup={lat,lon,address};
+ if(pickMarker)pickMarker.remove();
+ pickMarker=L.marker([lat,lon],{icon:pickupIcon()}).addTo(map);
+ pickMarker.bindTooltip('Pickup Point',{permanent:true,direction:'top',offset:[0,-17],className:'pick-label'});
+ map.setView([lat,lon],16);
+ document.getElementById('addressPill').innerHTML='<b>●</b> '+address;
+}
+async function reversePickup(lat,lon){
+ document.getElementById('addressPill').innerHTML='<b>●</b> Finding pickup road/address...';
+ try{
+  const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+lat+'&lon='+lon+'&zoom=18&addressdetails=1');
+  const d=await r.json();
+  setPickup(lat,lon,d.display_name||('Current Location, '+lat.toFixed(5)+', '+lon.toFixed(5)));
+ }catch(e){
+  setPickup(lat,lon,'Current Location, '+lat.toFixed(5)+', '+lon.toFixed(5));
+ }
+}
+function usePickup(){
+ if(!navigator.geolocation){toast('GPS support illa');return}
+ toast('Pickup location ಹುಡುಕುತ್ತಿದೆ...');
+ navigator.geolocation.getCurrentPosition(p=>{
+  reversePickup(p.coords.latitude,p.coords.longitude);
+ },()=>toast('Location permission Allow ಮಾಡಿ, ನಂತರ try ಮಾಡಿ'),{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 const input=document.getElementById('destination');
-input.addEventListener('input',()=>search(input.value));
-input.addEventListener('keydown',e=>{if(e.key==='Enter')search(input.value,true)});
-async function search(q,force=false){
-  const box=document.getElementById('results');
-  if(q.trim().length<3){box.style.display='none';return}
-  box.style.display='block'; box.innerHTML='<div class="result">Searching address...</div>';
-  try{
-    const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=in&q='+encodeURIComponent(q));
-    const data=await r.json();
-    box.innerHTML='';
-    if(!data.length){box.innerHTML='<div class="result">No place found. Try Area / Cross / Landmark.</div>';return}
-    data.forEach(x=>{
-      const d=document.createElement('div'); d.className='result';
-      d.textContent=x.display_name;
-      d.onclick=()=>selectSearch(x);
-      box.appendChild(d);
-    });
-  }catch(e){box.innerHTML='<div class="result">Search temporarily unavailable.</div>'}
+input.addEventListener('input',()=>searchDest(input.value));
+input.addEventListener('keydown',e=>{if(e.key==='Enter')searchDest(input.value)});
+
+async function searchDest(q){
+ const box=document.getElementById('results');
+ if(q.trim().length<3){box.style.display='none';return}
+ box.style.display='block';box.innerHTML='<div class="result">Searching full address...</div>';
+ try{
+  const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q='+encodeURIComponent(q));
+  const data=await r.json();
+  box.innerHTML='';
+  if(!data.length){box.innerHTML='<div class="result">Place ಸಿಗಲಿಲ್ಲ. Area / Cross / Landmark type ಮಾಡಿ.</div>';return}
+  data.forEach(x=>{
+   const el=document.createElement('div');el.className='result';el.textContent=x.display_name;
+   el.onclick=()=>selectDrop(+x.lat,+x.lon,x.display_name);
+   box.appendChild(el);
+  });
+ }catch(e){box.innerHTML='<div class="result">Address search temporarily unavailable.</div>'}
 }
-function selectSearch(x){
-  input.value=x.display_name;
-  document.getElementById('results').style.display='none';
-  map.setView([+x.lat,+x.lon],16);
-  L.marker([+x.lat,+x.lon]).addTo(map);
-  show('Drop location selected');
+function selectDrop(lat,lon,address){
+ drop={lat,lon,address};
+ input.value=address.split(',')[0];
+ document.getElementById('results').style.display='none';
+ document.getElementById('dropCard').style.display='block';
+ document.getElementById('dropAddress').textContent=address;
+ if(dropMarker)dropMarker.remove();
+ dropMarker=L.marker([lat,lon],{icon:dropIcon()}).addTo(map);
+ if(pickup){
+  if(routeLine)routeLine.remove();
+  routeLine=L.polyline([[pickup.lat,pickup.lon],[lat,lon]],{dashArray:'8 8',weight:4}).addTo(map);
+  map.fitBounds(routeLine.getBounds(),{padding:[35,35]});
+ }else map.setView([lat,lon],15);
+ toast('Drop full address selected ✓');
 }
-function selectPlace(name,address){
-  input.value=name;
-  show(name+' selected as destination');
+function quickDrop(name,address){
+ input.value=name;
+ document.getElementById('dropCard').style.display='block';
+ document.getElementById('dropAddress').textContent=address;
+ toast(name+' selected ✓');
 }
-function show(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2200)}
+function toast(t){const x=document.getElementById('toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',2200)}
 init();
 </script>
 </body>
