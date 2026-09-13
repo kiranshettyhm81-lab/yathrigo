@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YathriGo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6f4;font-family:Arial,Helvetica,sans-serif;color:#102018}
+.app{max-width:430px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}
+.header{height:92px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee}
+.menu{font-size:30px;color:#102018}.logo{font-size:28px;font-weight:800;color:#08733f;white-space:nowrap}.logo span{color:#f5c400}.tag{font-size:12px;color:#6b6f70;text-align:center;margin-top:2px}.bell{font-size:26px}
+.hero{margin:14px;border-radius:21px;background:linear-gradient(120deg,#087842,#0a9250);color:#fff;height:180px;padding:22px;position:relative;overflow:hidden}
+.hero h1{font-size:28px;line-height:1.08;margin:0;width:59%}.hero p{color:#ffd21c;font-weight:800;font-size:16px;line-height:1.25;width:58%;margin-top:18px}.autoart{position:absolute;right:12px;bottom:4px;font-size:78px}
+.card{margin:14px;border-radius:20px;padding:18px;background:#fff;box-shadow:0 4px 18px #00000012}
+h2{margin:0 0 14px;font-size:25px}.loc{border:1px solid #dfe6e2;border-radius:14px;padding:12px 14px;margin:8px 0}.loc b{display:block;color:#08733f;font-size:15px}.loc.drop b{color:#e02f42}.loc input{border:0;width:100%;padding:5px 0 0;font-size:16px;outline:0;background:transparent}.quick{display:flex;margin:10px 0 2px}.quick div{flex:1;text-align:center;border-right:1px solid #ddd;font-size:13px}.quick div:last-child{border:0}.quick strong{display:block;font-size:15px;margin-top:3px}
+button{width:100%;border:0;border-radius:13px;padding:15px;background:#078750;color:white;font-size:17px;font-weight:800;margin-top:10px}.alt{background:#edf5f0!important;color:#08613e!important}
+.features{margin:14px;display:flex;background:#eff9f0;border-radius:17px;padding:13px 3px}.features div{flex:1;text-align:center;font-size:11px;border-right:1px solid #cfe1d4}.features div:last-child{border:0}.features b{display:block;font-size:21px;color:#35a33e}
+.why{display:flex;gap:5px}.why div{flex:1;text-align:center;font-size:11px}.why i{display:block;font-style:normal;font-size:26px;margin-bottom:5px}
+.promo{background:#fff8dc;border-radius:17px;padding:14px;display:flex;align-items:center;gap:10px}.promo .coin{font-size:40px}.promo button{background:#f7c900;color:#172018;width:auto;padding:10px 12px;font-size:13px;margin:0}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(430px,100%);height:70px;background:#fff;border-top:1px solid #e5e9e7;display:flex;z-index:10}.nav div{flex:1;text-align:center;color:#636966;font-size:10px;padding-top:7px}.nav b{display:block;font-size:21px;margin-bottom:3px}.nav .active{color:#087a48}
+.hidden{display:none!important}.center{text-align:center;padding:30px 10px}.big{font-size:65px}.autoRow{border:2px solid #e1e7e3;border-radius:15px;padding:13px;margin:9px 0;display:flex;justify-content:space-between;align-items:center}.autoRow.sel{border-color:#078750;background:#effaf4}.fare{font-size:20px;font-weight:800}.muted{color:#707a75;font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header"><div class="menu">☰</div><div><div class="logo">Yathri<span>Go</span> 🛺</div><div class="tag">Your Ride, Our Promise</div></div><div class="bell">♧</div></header>
+
+<main id="home">
+<div class="hero"><h1>Safe Rides.<br>Affordable Fares.</h1><p>YathriGo with You,<br>Every Mile.</p><div class="autoart">🛺</div></div>
+<div class="card"><h2>Where are you going?</h2>
+<div class="loc"><b>🟢 Pickup location</b><input id="pickup" placeholder="Enter pickup location"><button type="button" onclick="useCurrentLocation()" style="margin-top:8px;padding:10px;font-size:14px">📍 Use Current Location</button></div>
+<div class="loc drop"><b>🔴 Drop location</b><input id="drop" placeholder="Enter drop location"></div>
+<div class="quick"><div>⌂<strong>Home</strong><small>Add home</small></div><div>▣<strong>Work</strong><small>Add work</small></div><div>•••<strong>More</strong><small>Saved places</small></div></div>
+<button onclick="findAutos()">Book Auto →</button></div>
+<div class="features"><div>🛡️<b>✓</b>Verified<br>Drivers</div><div>🛡️<b>✓</b>Safe &<br>Secure</div><div>₹<b>₹</b>Fair &<br>Transparent</div><div>♧<b>24</b>24x7<br>Support</div></div>
+<div class="card"><h2>Why YathriGo?</h2><div class="why"><div><i>₹</i>No Surge<br>Pricing</div><div><i>◉</i>Fare shown<br>before ride</div><div><i>📍</i>Live Tracking<br>of your ride</div><div><i>🛡️</i>Your Safety<br>Our Priority</div></div></div>
+<div class="card promo"><div class="coin">👛</div><div style="flex:1"><b>New to YathriGo?</b><br><span>Get up to <b style="color:#087a48">₹50</b> cashback on your first 3 rides!</span></div><button onclick="alert('Offers will be available soon')">Know More →</button></div>
+</main>
+
+<section id="choose" class="hidden"><div class="card"><h2>Choose Your Auto</h2><div class="muted">Fare shown before booking</div><div id="autos"></div><button onclick="confirmRide()">Confirm Auto Booking</button><button class="alt" onclick="backHome()">Back</button></div></section>
+<section id="accepted" class="hidden"><div class="card center"><div class="big">🛺</div><h2>Driver Accepted!</h2><h3 id="driver"></h3><p class="muted" id="vehicle"></p><button onclick="startTrip()">Start Trip</button><button class="alt" onclick="sos()">🆘 SOS Emergency</button></div></section>
+<section id="trip" class="hidden"><div class="card"><h2>Trip Ongoing</h2><p>🛺 Driver: <b id="tripDriver"></b></p><p>🟢 <span id="tp"></span></p><p>🔴 <span id="td"></span></p><button onclick="completeTrip()">Complete Trip</button><button class="alt" onclick="sos()">🆘 SOS</button></div></section>
+<section id="done" class="hidden"><div class="card center"><div class="big">✅</div><h2>Trip Completed</h2><p id="finalFare"></p><input id="rating" placeholder="Rate driver 1–5" maxlength="1" style="width:100%;padding:14px;border:1px solid #ddd;border-radius:12px"><button onclick="rating()">Submit Rating</button><button class="alt" onclick="backHome()">Book Another Auto</button></div></section>
+
+<nav class="nav"><div class="active">⌂<b>Home</b></div><div>◷<b>My Rides</b></div><div>▣<b>Payments</b></div><div>☆<b>Offers</b></div><div>♙<b>Profile</b></div></nav>
+</div>
+<script>
+let selected=0,ride=null;
+const autos=[["Ramesh","KA-13-AB-1234","4.8",86],["Manjunath","KA-13-CD-5678","4.7",92],["Suresh","KA-13-EF-9012","4.9",98]];
+function section(id){["home","choose","accepted","trip","done"].forEach(x=>document.getElementById(x).classList.add("hidden"));document.getElementById(id).classList.remove("hidden")}
+function findAutos(){if(!pickup.value.trim()||!drop.value.trim()){alert("Pickup and destination enter madi");return}selected=0;renderAutos();section("choose")}
+function renderAutos(){document.getElementById("autos").innerHTML=autos.map((a,i)=>`<div class="autoRow ${i===selected?"sel":""}" onclick="selectAuto(${i})"><div><b>🛺 ${a[0]}</b><br><span class="muted">${a[1]} · ⭐ ${a[2]}</span></div><div class="fare">₹${a[3]}</div></div>`).join("")}
+function selectAuto(i){selected=i;renderAutos()}
+function confirmRide(){let a=autos[selected];ride={pickup:pickup.value,drop:drop.value,driver:a[0],vehicle:a[1],fare:a[3]};driver.textContent=a[0]+" · ⭐ "+a[2];vehicle.textContent=a[1]+" · Auto";section("accepted")}
+function startTrip(){tripDriver.textContent=ride.driver;tp.textContent=ride.pickup;td.textContent=ride.drop;section("trip")}
+function completeTrip(){finalFare.textContent="Fare: ₹"+ride.fare+" · Cash / UPI";section("done")}
+function rating(){let x=document.getElementById("rating").value;if(!/^[1-5]$/.test(x)){alert("1 to 5 rating enter madi");return}alert("Thank you! Rating saved.");backHome()}
+function backHome(){section("home")}
+function useCurrentLocation(){
+ if(!navigator.geolocation){alert("ಈ browser GPS support ಮಾಡುತ್ತಿಲ್ಲ.");return}
+ navigator.geolocation.getCurrentPosition(
+  p=>{
+   const lat=p.coords.latitude.toFixed(6),lon=p.coords.longitude.toFixed(6);
+   document.getElementById("pickup").value="Current Location ("+lat+", "+lon+")";
+   alert("Current location ಸಿಕ್ಕಿದೆ ✓");
+  },
+  ()=>alert("Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ."),
+  {enableHighAccuracy:true,timeout:10000}
+ )
+}
+function sos(){alert("SOS demo alert sent.")}
+</script>
+</body></html>
