@@ -4,54 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>YathriGo</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f4f7f5;font-family:Arial,sans-serif;color:#102018}
+*{box-sizing:border-box}body{margin:0;background:#f4f7f5;font-family:Arial,sans-serif;color:#102018}
 .app{max-width:480px;margin:auto;min-height:100vh;background:#fff;padding-bottom:82px}
 header{height:92px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee}
-.menu{font-size:30px}.logo{font-size:29px;font-weight:800}.y{color:#087b3f}.g{color:#f5c400}
-.tag{font-size:13px;color:#666;text-align:center;margin-top:2px}
+.logo{font-size:29px;font-weight:800}.y{color:#087b3f}.g{color:#f5c400}.tag{font-size:13px;color:#666;text-align:center;margin-top:2px}
 .hero{margin:16px;border-radius:22px;background:linear-gradient(120deg,#087b42,#0a9250);color:#fff;height:190px;padding:24px;position:relative;overflow:hidden}
-.hero h1{font-size:29px;line-height:1.05;margin:0;width:58%}
-.hero p{color:#ffd21c;font-weight:800;font-size:17px;line-height:1.25;width:58%;margin-top:24px}
-.auto{position:absolute;right:20px;bottom:18px;font-size:72px}
-.card{margin:14px;border-radius:22px;padding:18px;background:#fff;box-shadow:0 4px 18px #00000012}
-h2{margin:0 0 16px;font-size:27px}
-.loc{border:1px solid #dfe6e2;border-radius:16px;padding:13px;margin:10px 0}
-.loc b{display:block;font-size:17px}
-.pickup b{color:#087b42}.drop b{color:#c74755}
-.address{font-size:16px;margin-top:7px;line-height:1.3;word-break:break-word}
-.house{width:100%;margin-top:10px;padding:13px;border:1px solid #dfe6e2;border-radius:13px;font-size:16px}
-button{width:100%;border:0;border-radius:13px;padding:15px;background:#078b4e;color:white;font-size:17px;font-weight:800;margin-top:10px;cursor:pointer}
-button.alt{background:#fff;color:#087b42;border:1px solid #087b42}
-.small{font-size:12px;color:#777;margin-top:7px}
-.quick{display:flex;margin-top:12px}
-.quick div{flex:1;text-align:center;padding:8px;border-right:1px solid #ddd;font-weight:700}
-.quick div:last-child{border:0}.quick span{display:block;font-size:12px;font-weight:normal;color:#777;margin-top:3px}
-.features{display:flex;margin:14px;background:#eff9f4;border-radius:17px;padding:12px 3px}
-.features div{flex:1;text-align:center;font-size:11px}.features strong{display:block;color:#087b42;font-size:20px}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:76px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:10}
-nav div{flex:1;text-align:center;padding-top:10px;font-weight:700;color:#68716d;font-size:15px}
-nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3px}
+.hero h1{font-size:29px;line-height:1.05;margin:0;width:58%}.hero p{color:#ffd21c;font-weight:800;font-size:17px;line-height:1.25;width:58%;margin-top:24px}.auto{position:absolute;right:20px;bottom:18px;font-size:72px}
+.card{margin:14px;border-radius:22px;padding:18px;background:#fff;box-shadow:0 4px 18px #00000012}h2{margin:0 0 16px;font-size:27px}
+.loc{border:1px solid #dfe6e2;border-radius:16px;padding:13px;margin:10px 0}.loc b{display:block;font-size:17px}.pickup b{color:#087b42}.drop b{color:#c74755}
+.address{font-size:16px;margin-top:7px;line-height:1.3;word-break:break-word}.house{width:100%;margin-top:10px;padding:13px;border:1px solid #dfe6e2;border-radius:13px;font-size:16px}
+button{width:100%;border:0;border-radius:13px;padding:15px;background:#078b4e;color:white;font-size:17px;font-weight:800;margin-top:10px}.small{font-size:12px;color:#777;margin-top:7px}
+.quick{display:flex;margin-top:12px}.quick div{flex:1;text-align:center;padding:8px;border-right:1px solid #ddd;font-weight:700}.quick div:last-child{border:0}.quick span{display:block;font-size:12px;font-weight:normal;color:#777;margin-top:3px}
+.features{display:flex;margin:14px;background:#eff9f4;border-radius:17px;padding:12px 3px}.features div{flex:1;text-align:center;font-size:11px}.features strong{display:block;color:#087b42;font-size:20px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);height:76px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:10}nav div{flex:1;text-align:center;padding-top:10px;font-weight:700;color:#68716d;font-size:15px}nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3px}
+#dropResults{display:none;margin-top:8px;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#fff}.result{padding:12px;border-bottom:1px solid #eee;cursor:pointer}.result:last-child{border-bottom:0}.result strong{display:block;font-size:14px}.result small{color:#777}
+#map{display:none;height:230px;margin-top:10px;border-radius:14px;overflow:hidden}.mapBtns{display:none;gap:8px}.mapBtns button{flex:1;font-size:14px;padding:12px}
+.fareBox{display:none;margin-top:12px;border:1px solid #dfe6e2;border-radius:16px;padding:15px;background:#f7fbf8}
+.fareRow{display:flex;justify-content:space-between;padding:5px 0}.fareTotal{font-size:23px;font-weight:800;color:#087b42;border-top:1px solid #ddd;margin-top:7px;padding-top:10px}
 .msg{padding:12px;border-radius:12px;background:#eef8f2;color:#087b42;font-weight:700;margin-top:10px}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
-<div class="menu">☰</div>
-<div>
-<div class="logo"><span class="y">Yathri</span><span class="g">Go</span> 🛺</div>
-<div class="tag">Your Ride, Our Promise</div>
-</div>
-<div style="font-size:27px">♧</div>
-</header>
+<header><div style="font-size:30px">☰</div><div><div class="logo"><span class="y">Yathri</span><span class="g">Go</span> 🛺</div><div class="tag">Your Ride, Our Promise</div></div><div style="font-size:27px">♧</div></header>
 
-<div class="hero">
-<h1>Safe Rides.<br>Affordable<br>Fares.</h1>
-<p>YathriGo with You,<br>Every Mile.</p>
-<div class="auto">🛺</div>
-</div>
+<div class="hero"><h1>Safe Rides.<br>Affordable<br>Fares.</h1><p>YathriGo with You,<br>Every Mile.</p><div class="auto">🛺</div></div>
 
 <div class="card">
 <h2>Where are you going?</h2>
@@ -60,126 +39,160 @@ nav .active{color:#087b42}nav span{display:block;font-size:11px;margin-bottom:3p
 <b>🟢 Pickup location</b>
 <div id="pickupAddress" class="address">Enter pickup location</div>
 <input id="pickupHouse" class="house" placeholder="🏠 House / Door No.">
-<button onclick="getLocation()">📍 Use Current Location</button>
+<button onclick="getPickupLocation()">📍 Use Current Location</button>
 <div class="small">GPS address ಸಿಕ್ಕಿದ ನಂತರ House / Door No. ಸೇರಿಸಿ.</div>
 </div>
 
 <div class="loc drop">
 <b>🔴 Drop location</b>
-<div id="dropAddressText" class="address">Enter drop location</div>
-<input id="dropAddress" class="house" placeholder="Enter drop location">
+<input id="dropAddress" class="house" placeholder="🔎 Search destination" autocomplete="off" oninput="searchDrop()">
+<div id="dropResults"></div>
+<button type="button" onclick="showDropMap()">🗺️ Choose Drop on Map</button>
+<div id="map"></div>
+<div id="mapBtns" class="mapBtns">
+<button type="button" onclick="useMapCenter()">📌 Use This Location</button>
+<button type="button" onclick="closeDropMap()" style="background:#6b7772">Close Map</button>
+</div>
 <input id="dropHouse" class="house" placeholder="🏠 Drop House / Door No.">
-<button class="alt" onclick="getDropLocation()">📍 Use Current Location for Drop</button>
-<div class="small">Drop GPS location ಪಡೆಯಲು ಈ button ಒತ್ತಿ.</div>
+<div class="small">Drop location ಹುಡುಕಿ ಅಥವಾ Mapನಲ್ಲಿ pin select ಮಾಡಿ.</div>
 </div>
 
-<div class="quick">
-<div>⌂<br>Home<span>Add home</span></div>
-<div>▣<br>Work<span>Add work</span></div>
-<div>•••<br>More<span>Saved places</span></div>
+<div id="fareBox" class="fareBox">
+<div class="fareRow"><span>📏 Distance</span><strong id="distanceText">--</strong></div>
+<div class="fareRow"><span>💰 Estimated fare</span><strong id="fareText">--</strong></div>
+<div class="fareTotal">YathriGo Fare: <span id="totalFare">--</span></div>
+<div class="small">Fare is an estimate for this prototype. Final fare can be configured later.</div>
+</div>
+<div class="quick"><div>⌂<br>Home<span>Add home</span></div><div>▣<br>Work<span>Add work</span></div><div>•••<br>More<span>Saved places</span></div></div>
+<button onclick="bookAuto()">Book Auto →</button><div id="message"></div>
 </div>
 
-<button onclick="bookAuto()">Book Auto →</button>
-<div id="message"></div>
+<div class="features"><div><strong>✓</strong>Verified</div><div><strong>✓</strong>Safe</div><div><strong>₹</strong>Fair</div><div><strong>24</strong>7x24</div></div>
+<nav><div class="active"><span>⌂</span>Home</div><div><span>◷</span>My<br>Rides</div><div><span>▣</span>Payments</div><div><span>☆</span>Offers</div><div><span>♙</span>Profile</div></nav>
 </div>
 
-<div class="features">
-<div><strong>✓</strong>Verified</div>
-<div><strong>✓</strong>Safe</div>
-<div><strong>₹</strong>Fair</div>
-<div><strong>24</strong>7x24</div>
-</div>
-
-<nav>
-<div class="active"><span>⌂</span>Home</div>
-<div><span>◷</span>My<br>Rides</div>
-<div><span>▣</span>Payments</div>
-<div><span>☆</span>Offers</div>
-<div><span>♙</span>Profile</div>
-</nav>
-</div>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let coords=null;
-let dropCoords=null;
+let pickupCoords=null,dropCoords=null,map=null,mapMarker=null,searchTimer=null;
 
-async function reverseAddress(lat,lon,out){
-out.textContent='GPS location ಸಿಕ್ಕಿದೆ. Full address ಹುಡುಕುತ್ತಿದೆ...';
-try{
-const r=await fetch(
-'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+
-lat+'&lon='+lon+'&zoom=18&addressdetails=1'
-);
-const d=await r.json();
-out.textContent=d.display_name || ('Current Location ('+
-lat.toFixed(6)+', '+lon.toFixed(6)+')');
-}catch(e){
-out.textContent='Current Location ('+
-lat.toFixed(6)+', '+lon.toFixed(6)+')';
-}
+function getPickupLocation(){
+ const out=document.getElementById("pickupAddress");out.textContent="Location ಹುಡುಕುತ್ತಿದೆ...";
+ if(!navigator.geolocation){out.textContent="ಈ browser GPS support ಮಾಡಲ್ಲ.";return;}
+ navigator.geolocation.getCurrentPosition(async p=>{
+  pickupCoords={lat:p.coords.latitude,lon:p.coords.longitude};out.textContent="GPS location ಸಿಕ್ಕಿದೆ. Full address ಹುಡುಕುತ್ತಿದೆ...";
+  try{const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+pickupCoords.lat+"&lon="+pickupCoords.lon+"&zoom=18&addressdetails=1");const d=await r.json();out.textContent=d.display_name||"Current Location";}
+  catch(e){out.textContent="Current Location";}
+ },()=>{out.textContent="Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ."},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
-function getLocation(){
-const out=document.getElementById('pickupAddress');
-out.textContent='Location ಹುಡುಕುತ್ತಿದೆ...';
-if(!navigator.geolocation){
-out.textContent='ಈ browser GPS support ಮಾಡಲ್ಲ.';
-return;
-}
-navigator.geolocation.getCurrentPosition(async p=>{
-coords={lat:p.coords.latitude,lon:p.coords.longitude};
-await reverseAddress(coords.lat,coords.lon,out);
-},()=>{
-out.textContent='Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.';
-},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
-}
-
-function getDropLocation(){
-const out=document.getElementById('dropAddressText');
-const input=document.getElementById('dropAddress');
-out.textContent='Drop location ಹುಡುಕುತ್ತಿದೆ...';
-
-if(!navigator.geolocation){
-out.textContent='ಈ browser GPS support ಮಾಡಲ್ಲ.';
-return;
+function searchDrop(){
+ clearTimeout(searchTimer);
+ const q=document.getElementById("dropAddress").value.trim(),box=document.getElementById("dropResults");
+ if(q.length<3){box.style.display="none";return;}
+ searchTimer=setTimeout(async()=>{
+  try{
+   const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&q="+encodeURIComponent(q));
+   const data=await r.json();box.innerHTML="";
+   if(!data.length){box.innerHTML='<div class="result">Location ಸಿಗಲಿಲ್ಲ.</div>';box.style.display="block";return;}
+   data.forEach(x=>{
+    const div=document.createElement("div");div.className="result";
+    div.innerHTML="<strong>"+escapeHtml(x.display_name.split(",").slice(0,2).join(", "))+"</strong><small>"+escapeHtml(x.display_name)+"</small>";
+    div.onclick=()=>selectDrop(x);box.appendChild(div);
+   });box.style.display="block";
+  }catch(e){box.innerHTML='<div class="result">Search temporarily unavailable.</div>';box.style.display="block";}
+ },450);
 }
 
-navigator.geolocation.getCurrentPosition(async p=>{
-dropCoords={lat:p.coords.latitude,lon:p.coords.longitude};
-await reverseAddress(dropCoords.lat,dropCoords.lon,out);
-input.value=out.textContent;
-},()=>{
-out.textContent='Drop location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ.';
-},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+function selectDrop(x){
+ dropCoords={lat:parseFloat(x.lat),lon:parseFloat(x.lon)};
+ document.getElementById("dropAddress").value=x.display_name;
+ document.getElementById("dropResults").style.display="none";
+ calculateFare();
+}
+
+function showDropMap(){
+ const mapBox=document.getElementById("map"),btns=document.getElementById("mapBtns");
+ mapBox.style.display="block";btns.style.display="flex";
+ if(!map){
+  const start=dropCoords||pickupCoords||{lat:12.9716,lon:77.5946};
+  map=L.map("map").setView([start.lat,start.lon],15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+  map.on("click",e=>setMapMarker(e.latlng));
+ }else{
+  const start=dropCoords||pickupCoords||map.getCenter();map.setView([start.lat,start.lon],15);
+  setTimeout(()=>map.invalidateSize(),100);
+ }
+ if(dropCoords)setMapMarker(dropCoords);
+ setTimeout(()=>map.invalidateSize(),200);
+}
+
+function setMapMarker(pos){
+ dropCoords={lat:pos.lat,lon:pos.lng};
+ if(mapMarker)mapMarker.setLatLng([pos.lat,pos.lng]);
+ else mapMarker=L.marker([pos.lat,pos.lng],{draggable:true}).addTo(map);
+ if(mapMarker.dragging)mapMarker.on("dragend",()=>{const p=mapMarker.getLatLng();dropCoords={lat:p.lat,lon:p.lng}; calculateFare();});
+}
+
+async function useMapCenter(){
+ if(!map)return;
+ const p=mapMarker?mapMarker.getLatLng():map.getCenter();
+ dropCoords={lat:p.lat,lon:p.lng};
+ const input=document.getElementById("dropAddress");input.value="Location address ಹುಡುಕುತ್ತಿದೆ...";
+ try{const r=await fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+dropCoords.lat+"&lon="+dropCoords.lon+"&zoom=18&addressdetails=1");const d=await r.json();input.value=d.display_name||("Selected Location ("+dropCoords.lat.toFixed(6)+", "+dropCoords.lon.toFixed(6)+")");}
+ catch(e){input.value="Selected Location ("+dropCoords.lat.toFixed(6)+", "+dropCoords.lon.toFixed(6)+")";}
+ closeDropMap();
+ calculateFare();
+}
+
+function closeDropMap(){document.getElementById("map").style.display="none";document.getElementById("mapBtns").style.display="none";}
+
+
+async function calculateFare(){
+ const fareBox=document.getElementById("fareBox");
+ const distanceText=document.getElementById("distanceText");
+ const fareText=document.getElementById("fareText");
+ const totalFare=document.getElementById("totalFare");
+ if(!pickupCoords||!dropCoords){
+   fareBox.style.display="none";
+   return;
+ }
+ fareBox.style.display="block";
+ distanceText.textContent="Calculating...";
+ fareText.textContent="Calculating...";
+ totalFare.textContent="...";
+ try{
+   const url="https://router.project-osrm.org/route/v1/driving/"+pickupCoords.lon+","+pickupCoords.lat+";"+dropCoords.lon+","+dropCoords.lat+"?overview=false";
+   const r=await fetch(url);
+   const d=await r.json();
+   if(!d.routes||!d.routes[0]) throw new Error("route");
+   const km=d.routes[0].distance/1000;
+   const fare=Math.max(50,Math.round(30+km*15));
+   distanceText.textContent=km.toFixed(1)+" km";
+   fareText.textContent="₹"+fare;
+   totalFare.textContent="₹"+fare;
+ }catch(e){
+   const R=6371, a=Math.PI/180;
+   const dLat=(dropCoords.lat-pickupCoords.lat)*a, dLon=(dropCoords.lon-pickupCoords.lon)*a;
+   const x=Math.sin(dLat/2)**2+Math.cos(pickupCoords.lat*a)*Math.cos(dropCoords.lat*a)*Math.sin(dLon/2)**2;
+   const km=R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+   const fare=Math.max(50,Math.round(30+km*15));
+   distanceText.textContent=km.toFixed(1)+" km (approx.)";
+   fareText.textContent="₹"+fare;
+   totalFare.textContent="₹"+fare;
+ }
 }
 
 function bookAuto(){
-const house=document.getElementById('pickupHouse').value.trim();
-const drop=document.getElementById('dropAddress').value.trim();
-const dropHouse=document.getElementById('dropHouse').value.trim();
-
-if(!coords){
-alert('ಮೊದಲು Pickup ನಲ್ಲಿ Use Current Location ಒತ್ತಿ.');
-return;
-}
-if(!house){
-alert('Pickup House / Door No. ನಮೂದಿಸಿ.');
-return;
-}
-if(!drop && !dropCoords){
-alert('Drop location ನಮೂದಿಸಿ ಅಥವಾ Drop GPS button ಒತ್ತಿ.');
-return;
-}
-if(!dropHouse){
-alert('Drop House / Door No. ನಮೂದಿಸಿ.');
-return;
+ const house=document.getElementById("pickupHouse").value.trim(),drop=document.getElementById("dropAddress").value.trim();
+ if(!pickupCoords){alert("ಮೊದಲು Pickup ಗೆ Use Current Location ಒತ್ತಿ.");return;}
+ if(!house){alert("Pickup House / Door No. ನಮೂದಿಸಿ.");return;}
+ if(!drop||!dropCoords){alert("Drop location Search ಮಾಡಿ ಅಥವಾ Mapನಲ್ಲಿ select ಮಾಡಿ.");return;}
+ calculateFare();
+ document.getElementById("message").innerHTML="🛺 Auto ಹುಡುಕಲಾಗುತ್ತಿದೆ...";
+ setTimeout(()=>document.getElementById("message").innerHTML="✅ Driver request sent. Demo booking successful.",900);
 }
 
-document.getElementById('message').innerHTML='🛺 Auto ಹುಡುಕಲಾಗುತ್ತಿದೆ...';
-setTimeout(()=>{
-document.getElementById('message').innerHTML='✅ Driver request sent. Demo booking successful.';
-},900);
-}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
 </script>
 </body>
 </html>
