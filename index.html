@@ -45,7 +45,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,
 
 <div class="loc drop">
 <b>🔴 Drop location</b>
-<input id="dropAddress" class="house" placeholder="🔎 Search destination (Area / Cross / Landmark)" autocomplete="off" oninput="searchDrop()">
+<div style="display:flex;gap:8px;align-items:center"><input id="dropAddress" class="house" style="margin-top:0;flex:1" placeholder="🔎 Area / Cross / Landmark" autocomplete="off"><button type="button" onclick="searchDrop(true)" style="width:auto;margin-top:0;padding:13px 16px;white-space:nowrap">Search</button></div>
 <div id="dropResults"></div>
 <button type="button" onclick="showDropMap()">🗺️ Choose Exact Drop on Map</button>
 <div id="map"></div>
@@ -71,7 +71,11 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,
 <nav><div class="active"><span>⌂</span>Home</div><div><span>◷</span>My<br>Rides</div><div><span>▣</span>Payments</div><div><span>☆</span>Offers</div><div><span>♙</span>Profile</div></nav>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+document.getElementById("dropAddress").addEventListener("keydown",function(e){
+ if(e.key==="Enter"){e.preventDefault();searchDrop(true);}
+});
+</script>
 <script>
 let pickupCoords=null,dropCoords=null,map=null,mapMarker=null,searchTimer=null;
 
@@ -85,33 +89,70 @@ function getPickupLocation(){
  },()=>{out.textContent="Location permission Allow ಮಾಡಿ, ನಂತರ ಮತ್ತೆ try ಮಾಡಿ."},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
-function searchDrop(){
+function searchDrop(immediate=false){
  clearTimeout(searchTimer);
  const q=document.getElementById("dropAddress").value.trim(),box=document.getElementById("dropResults");
- if(q.length<3){box.style.display="none";return;}
- searchTimer=setTimeout(async()=>{
+ if(q.length<3){
+  box.innerHTML='<div class="result"><small>At least 3 letters type ಮಾಡಿ.</small></div>';
+  box.style.display="block"; return;
+ }
+ const run=async()=>{
+  box.innerHTML='<div class="result"><strong>🔎 Searching...</strong><small>Area / Cross / Landmark ಹುಡುಕುತ್ತಿದೆ.</small></div>';
+  box.style.display="block";
   try{
-   const params=new URLSearchParams({format:"jsonv2",addressdetails:"1",limit:"8",q:q});
+   const params=new URLSearchParams({
+    format:"jsonv2",addressdetails:"1",limit:"8",q:q,countrycodes:"in"
+   });
    if(pickupCoords){
-    params.set("viewbox",(pickupCoords.lon-1)+","+(pickupCoords.lat+1)+","+(pickupCoords.lon+1)+","+(pickupCoords.lat-1));
+    params.set("viewbox",
+      (pickupCoords.lon-1)+","+(pickupCoords.lat+1)+","+
+      (pickupCoords.lon+1)+","+(pickupCoords.lat-1));
    }
-   const r=await fetch("https://nominatim.openstreetmap.org/search?"+params.toString(),{headers:{"Accept":"application/json"}});
-   const data=await r.json();box.innerHTML="";
+   const urls=[
+    "https://nominatim.openstreetmap.org/search?"+params.toString(),
+    "https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&limit=8"
+   ];
+   let data=[];
+   for(const url of urls){
+    try{
+     const r=await fetch(url,{headers:{"Accept":"application/json"}});
+     if(!r.ok) continue;
+     const j=await r.json();
+     data = j.features ? j.features.map(f=>({
+       lat:f.geometry.coordinates[1], lon:f.geometry.coordinates[0],
+       display_name:[
+        f.properties.name,f.properties.street,f.properties.locality,
+        f.properties.district,f.properties.city,f.properties.state
+       ].filter(Boolean).join(", "),
+       address:f.properties
+     })) : j;
+     if(data.length) break;
+    }catch(e){}
+   }
+   box.innerHTML="";
    if(!data.length){
-    box.innerHTML='<div class="result"><strong>Exact place ಸಿಗಲಿಲ್ಲ.</strong><small>Area / Cross / Landmark ಇನ್ನೊಮ್ಮೆ try ಮಾಡಿ, ಅಥವಾ Mapನಲ್ಲಿ exact pin ಆಯ್ಕೆ ಮಾಡಿ.</small></div>';
-    box.style.display="block";return;
+    box.innerHTML='<div class="result"><strong>Exact place ಸಿಗಲಿಲ್ಲ.</strong><small>Full address ಅಥವಾ Area + Cross + Landmark ಸೇರಿಸಿ search ಮಾಡಿ. ಸಿಗದಿದ್ದರೆ “Choose Exact Drop on Map” ಬಳಸಿ.</small></div>';
+    box.style.display="block"; return;
    }
    data.forEach(x=>{
-    const div=document.createElement("div");div.className="result";
-    const a=x.address||{};
-    const parts=[a.road,a.neighbourhood,a.suburb,a.city||a.town||a.village,a.state].filter(Boolean);
-    const title=(parts.slice(0,3).join(", "))||x.display_name.split(",").slice(0,3).join(", ");
-    div.innerHTML="<strong>📍 "+escapeHtml(title)+"</strong><small>"+escapeHtml(x.display_name)+"</small>";
-    div.onclick=()=>selectDrop(x);box.appendChild(div);
+    const div=document.createElement("div"); div.className="result";
+    const a=x.address||x.properties||{};
+    const title=([
+      a.road,a.neighbourhood,a.suburb,a.locality,a.district,
+      a.city||a.town||a.village,a.state
+    ].filter(Boolean).slice(0,4).join(", "))
+      || (x.display_name||"Selected place").split(",").slice(0,4).join(", ");
+    div.innerHTML="<strong>📍 "+escapeHtml(title)+"</strong><small>"+escapeHtml(x.display_name||"")+"</small>";
+    div.onclick=()=>selectDrop(x);
+    box.appendChild(div);
    });
    box.style.display="block";
-  }catch(e){box.innerHTML='<div class="result">Search temporarily unavailable. Mapನಲ್ಲಿ exact pin ಆಯ್ಕೆ ಮಾಡಿ.</div>';box.style.display="block";}
- },450);
+  }catch(e){
+   box.innerHTML='<div class="result"><strong>Search unavailable.</strong><small>Internet check ಮಾಡಿ ಅಥವಾ Mapನಲ್ಲಿ exact pin ಆಯ್ಕೆ ಮಾಡಿ.</small></div>';
+   box.style.display="block";
+  }
+ };
+ if(immediate) run(); else searchTimer=setTimeout(run,800);
 }
 
 function selectDrop(x){
@@ -205,6 +246,10 @@ function bookAuto(){
 }
 
 function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+
+document.getElementById("dropAddress").addEventListener("keydown",function(e){
+ if(e.key==="Enter"){e.preventDefault();searchDrop(true);}
+});
 </script>
 </body>
 </html>
