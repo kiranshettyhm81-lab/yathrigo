@@ -36,7 +36,7 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,
 nav div{flex:1;text-align:center;padding-top:9px;color:#68736f;font-size:13px;font-weight:700}
 nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px}
 #toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#10251b;color:#fff;padding:10px 15px;border-radius:12px;z-index:2000;display:none}
-</style>
+.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}</style>
 </head>
 <body>
 <div class="app">
@@ -49,6 +49,7 @@ nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px
 
 <div class="search">🔎 <input id="destination" placeholder="Where do you want to go? Search area, cross, landmark"></div>
 <div id="results" class="result-box"></div>
+<button class="map-drop-btn" onclick="pickDropOnMap()">📍 Choose exact Drop on Map</button>
 
 <div id="dropCard" class="drop-card">
 <div class="drop-title">🔴 Drop location</div>
@@ -137,21 +138,99 @@ function compactAddress(a, fallback){
   return parts.filter(Boolean).join(', ') || fallback || '';
 }
 async function searchDest(q){
- const box=document.getElementById('results');
- if(q.trim().length<3){box.style.display='none';return}
- box.style.display='block';box.innerHTML='<div class="result">Searching full address...</div>';
- try{
-  const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=in&q='+encodeURIComponent(q));
-  const data=await r.json();
+  const box=document.getElementById('results');
+  q=(q||'').trim();
+  if(q.length<2){box.style.display='none';return;}
+  box.style.display='block';
+  box.innerHTML='<div class="result">🔎 Searching location...</div>';
+
+  // Helpful corrections for common Bengaluru spellings.
+  const corrections={
+    'yashwanpura':'Yeshwanthpur',
+    'yashwantpura':'Yeshwanthpur',
+    'yashwanthpura':'Yeshwanthpur',
+    'yeshwanpura':'Yeshwanthpur',
+    'yeshwanthpura':'Yeshwanthpur'
+  };
+  const corrected=corrections[q.toLowerCase()]||q;
+
+  const queries=[
+    corrected,
+    corrected+', Bengaluru, Karnataka',
+    q+', Bengaluru, Karnataka'
+  ];
+
+  async function nominatim(query){
+    const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=in&q='+encodeURIComponent(query);
+    const r=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!r.ok) throw new Error('Nominatim '+r.status);
+    return await r.json();
+  }
+
+  async function photon(query){
+    const url='https://photon.komoot.io/api/?limit=8&lang=en&q='+encodeURIComponent(query);
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('Photon '+r.status);
+    const d=await r.json();
+    return (d.features||[]).map(f=>({
+      lat:f.geometry.coordinates[1],
+      lon:f.geometry.coordinates[0],
+      display_name:[
+        f.properties.name,
+        f.properties.street,
+        f.properties.suburb,
+        f.properties.city||f.properties.town,
+        f.properties.state
+      ].filter(Boolean).join(', '),
+      address:f.properties
+    }));
+  }
+
+  let data=[];
+  try{
+    for(const query of queries){
+      data=await nominatim(query);
+      if(data.length) break;
+    }
+  }catch(e){}
+
+  if(!data.length){
+    try{
+      data=await photon(corrected+', Bengaluru');
+    }catch(e){}
+  }
+
   box.innerHTML='';
-  if(!data.length){box.innerHTML='<div class="result">Place ಸಿಗಲಿಲ್ಲ. Area / Cross / Landmark type ಮಾಡಿ.</div>';return}
-  data.forEach(x=>{
-   const el=document.createElement('div');el.className='result';el.textContent=x.display_name;
-   el.onclick=()=>selectDrop(+x.lat,+x.lon,x.display_name);
-   box.appendChild(el);
+  if(!data.length){
+    box.innerHTML='<div class="result">❌ Location ಸಿಗಲಿಲ್ಲ. Example: Yeshwanthpur Bengaluru / 5th Cross Satyamangala Hassan</div>';
+    return;
+  }
+
+  data.slice(0,8).forEach(x=>{
+    const el=document.createElement('div');
+    el.className='result';
+    const full=x.display_name||'Selected location';
+    el.innerHTML='<b>📍 '+(full.split(',')[0]||'Location')+'</b><small style="display:block;color:#777;margin-top:3px">'+full+'</small>';
+    el.onclick=()=>selectDrop(Number(x.lat),Number(x.lon),full);
+    box.appendChild(el);
   });
- }catch(e){box.innerHTML='<div class="result">Address search temporarily unavailable.</div>'}
 }
+function pickDropOnMap(){
+  toast('Map ಮೇಲೆ Drop location select ಮಾಡಿ');
+  map.once('click',async e=>{
+    const lat=e.latlng.lat, lon=e.latlng.lng;
+    if(dropMarker)dropMarker.remove();
+    dropMarker=L.marker([lat,lon],{icon:dropIcon()}).addTo(map);
+    try{
+      const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat='+lat+'&lon='+lon);
+      const d=await r.json();
+      selectDrop(lat,lon,d.display_name||'Selected map location');
+    }catch(err){
+      selectDrop(lat,lon,'Selected map location');
+    }
+  });
+}
+
 function selectDrop(lat,lon,address){
  drop={lat,lon,address};
  input.value=address.split(',')[0];
@@ -225,4 +304,4 @@ if(psi) psi.addEventListener('keydown',e=>{if(e.key==='Enter') searchPickupPlace
 .location-picker input{width:100%;box-sizing:border-box;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:15px}
 .location-picker>button{margin-top:9px;width:100%;padding:12px;border:0;border-radius:12px;background:#0a9a50;color:#fff;font-weight:700}
 .pick-result{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eee;background:#fff;padding:12px 4px;font-size:13px}
-</style>
+.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}</style>
