@@ -37,7 +37,7 @@ nav div{flex:1;text-align:center;padding-top:9px;color:#68736f;font-size:13px;fo
 nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px}
 #toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#10251b;color:#fff;padding:10px 15px;border-radius:12px;z-index:2000;display:none}
 .map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}.search{position:relative}.search-btn{width:auto;margin:0;padding:9px 13px;border-radius:20px;background:#0a9a50;color:#fff;font-size:13px;flex:0 0 auto}
-.search input{min-width:0}.result small{word-break:break-word}</style>
+.search input{min-width:0}.result small{word-break:break-word}#dropCard,.drop-card,.dropCard{display:none!important}</style>
 </head>
 <body>
 <div class="app">
@@ -53,9 +53,6 @@ nav .active{color:#101820}nav span{display:block;font-size:24px;line-height:26px
 <div id="results" class="result-box"></div>
 <button class="map-drop-btn" onclick="pickDropOnMap()">📍 Choose exact Drop on Map</button>
 
-<div id="dropCard" class="drop-card">
-<div class="drop-title">🔴 Drop location</div>
-<div id="dropAddress" class="drop-address">Select a destination</div>
 </div>
 
 
@@ -230,7 +227,7 @@ function selectDrop(lat,lon,address){
  drop={lat,lon,address};
  input.value=address.split(',')[0];
  document.getElementById('results').style.display='none';
- document.getElementById('dropCard').style.display='block';
+ document.getElementById('dropCard').style.display='none';
  document.getElementById('dropAddress').textContent=address;
  if(dropMarker)dropMarker.remove();
  dropMarker=L.marker([lat,lon],{icon:dropIcon()}).addTo(map);
@@ -243,7 +240,7 @@ function selectDrop(lat,lon,address){
 }
 function quickDrop(name,address){
  input.value=name;
- document.getElementById('dropCard').style.display='block';
+ document.getElementById('dropCard').style.display='none';
  document.getElementById('dropAddress').textContent=address;
  toast(name+' selected ✓');
 }
@@ -299,4 +296,4 @@ if(psi) psi.addEventListener('keydown',e=>{if(e.key==='Enter') searchPickupPlace
 .location-picker input{width:100%;box-sizing:border-box;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:15px}
 .location-picker>button{margin-top:9px;width:100%;padding:12px;border:0;border-radius:12px;background:#0a9a50;color:#fff;font-weight:700}
 .pick-result{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eee;background:#fff;padding:12px 4px;font-size:13px}
-.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}</style>
+.map-drop-btn{width:100%;margin:6px 0 8px;padding:11px;border:1px solid #0a9a50;border-radius:12px;background:#fff;color:#087d43;font-weight:700;cursor:pointer}#dropCard,.drop-card,.dropCard{display:none!important}</style>
