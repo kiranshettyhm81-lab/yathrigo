@@ -45,16 +45,16 @@ nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,
 
 <div class="loc drop">
 <b>🔴 Drop location</b>
-<input id="dropAddress" class="house" placeholder="🔎 Search destination" autocomplete="off" oninput="searchDrop()">
+<input id="dropAddress" class="house" placeholder="🔎 Search destination (Area / Cross / Landmark)" autocomplete="off" oninput="searchDrop()">
 <div id="dropResults"></div>
-<button type="button" onclick="showDropMap()">🗺️ Choose Drop on Map</button>
+<button type="button" onclick="showDropMap()">🗺️ Choose Exact Drop on Map</button>
 <div id="map"></div>
 <div id="mapBtns" class="mapBtns">
 <button type="button" onclick="useMapCenter()">📌 Use This Location</button>
 <button type="button" onclick="closeDropMap()" style="background:#6b7772">Close Map</button>
 </div>
 <input id="dropHouse" class="house" placeholder="🏠 Drop House / Door No.">
-<div class="small">Drop location ಹುಡುಕಿ ಅಥವಾ Mapನಲ್ಲಿ pin select ಮಾಡಿ.</div>
+<div class="small">Area, Cross, Street ಅಥವಾ Landmark type ಮಾಡಿ → result select ಮಾಡಿ. Exact place ಸಿಗದಿದ್ದರೆ Map pin ಬಳಸಿ.</div>
 </div>
 
 <div id="fareBox" class="fareBox">
@@ -91,15 +91,26 @@ function searchDrop(){
  if(q.length<3){box.style.display="none";return;}
  searchTimer=setTimeout(async()=>{
   try{
-   const r=await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&q="+encodeURIComponent(q));
+   const params=new URLSearchParams({format:"jsonv2",addressdetails:"1",limit:"8",q:q});
+   if(pickupCoords){
+    params.set("viewbox",(pickupCoords.lon-1)+","+(pickupCoords.lat+1)+","+(pickupCoords.lon+1)+","+(pickupCoords.lat-1));
+   }
+   const r=await fetch("https://nominatim.openstreetmap.org/search?"+params.toString(),{headers:{"Accept":"application/json"}});
    const data=await r.json();box.innerHTML="";
-   if(!data.length){box.innerHTML='<div class="result">Location ಸಿಗಲಿಲ್ಲ.</div>';box.style.display="block";return;}
+   if(!data.length){
+    box.innerHTML='<div class="result"><strong>Exact place ಸಿಗಲಿಲ್ಲ.</strong><small>Area / Cross / Landmark ಇನ್ನೊಮ್ಮೆ try ಮಾಡಿ, ಅಥವಾ Mapನಲ್ಲಿ exact pin ಆಯ್ಕೆ ಮಾಡಿ.</small></div>';
+    box.style.display="block";return;
+   }
    data.forEach(x=>{
     const div=document.createElement("div");div.className="result";
-    div.innerHTML="<strong>"+escapeHtml(x.display_name.split(",").slice(0,2).join(", "))+"</strong><small>"+escapeHtml(x.display_name)+"</small>";
+    const a=x.address||{};
+    const parts=[a.road,a.neighbourhood,a.suburb,a.city||a.town||a.village,a.state].filter(Boolean);
+    const title=(parts.slice(0,3).join(", "))||x.display_name.split(",").slice(0,3).join(", ");
+    div.innerHTML="<strong>📍 "+escapeHtml(title)+"</strong><small>"+escapeHtml(x.display_name)+"</small>";
     div.onclick=()=>selectDrop(x);box.appendChild(div);
-   });box.style.display="block";
-  }catch(e){box.innerHTML='<div class="result">Search temporarily unavailable.</div>';box.style.display="block";}
+   });
+   box.style.display="block";
+  }catch(e){box.innerHTML='<div class="result">Search temporarily unavailable. Mapನಲ್ಲಿ exact pin ಆಯ್ಕೆ ಮಾಡಿ.</div>';box.style.display="block";}
  },450);
 }
 
@@ -107,6 +118,7 @@ function selectDrop(x){
  dropCoords={lat:parseFloat(x.lat),lon:parseFloat(x.lon)};
  document.getElementById("dropAddress").value=x.display_name;
  document.getElementById("dropResults").style.display="none";
+ showDropMap();
  calculateFare();
 }
 
